@@ -30,6 +30,7 @@ int readKeyInput();
 int main()  {
     enableRawMode();
     Editor textEditor;
+    textEditor.load_from_file("my_test_file.txt");
 
     while (true)  {
         textEditor.display_lines();
@@ -41,6 +42,7 @@ int main()  {
         {
         // Quit
         case CTRL_KEY('q'):
+            textEditor.save_to_file("my_test_file.txt");
             write(STDOUT_FILENO, "\x1b[2J", 4);
             write(STDOUT_FILENO, "\x1b[H", 3);
             exit(0);

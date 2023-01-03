@@ -3,6 +3,7 @@
 #include "screenInfo.h"
 #include <string>
 #include <iostream>
+#include <fstream>
 
 
 void Editor::cursor_left()  {
@@ -83,15 +84,31 @@ void Editor::recompute_lines()  {
 }
 
 
-// C++ FILE READING INPUT / OUTPUT ON .txt files
 void Editor::save_to_file(const char *file_path)  {
+    // Open the output file
+    std::ofstream fileSaver;
+    fileSaver.open(file_path);
+    if (!fileSaver)  { return; }
 
+    // Write to the file and close it
+    fileSaver << this->data;
+    fileSaver.close();
 }
 void Editor::load_from_file(const char *file_path)  {
+    // Open the input file
+    std::ifstream fileReader;
+    fileReader.open(file_path);
+    if (!fileReader)  { return; }
 
-}
-void Editor::get_file_size(const char *file_path)  {
+    // Read the entire file content into the data array of the editor
+    fileReader.seekg(0, std::ios::end);
+    this->data.resize(fileReader.tellg());
+    fileReader.seekg(0, std::ios::beg);
+    fileReader.read(&this->data[0], this->data.size());
+    fileReader.close();
 
+    // Generate each line        
+    this->recompute_lines();
 }
 
 

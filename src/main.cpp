@@ -3,8 +3,6 @@
  * 
  * https://viewsourcecode.org/snaptoken/kilo/index.html
  * Left off on CH4
- * -> You need to implement a custom data structure and handle some other things in it better than the tutorial
- * -> C++ ify it with classes and stuff. Modularize stuff as appropriate
 */
 
 #include "editor.h"
@@ -27,12 +25,13 @@ enum EDITOR_KEYS  {
 
 int readKeyInput();
 
-int main()  {
+int main(int argc, char** argv)  {
     enableRawMode();
     Editor textEditor;
-    textEditor.load_from_file("my_test_file.txt");
+    textEditor.load_from_file(argv[1]);
 
     while (true)  {
+        // Display the text to the screen
         textEditor.display_lines();
 
         // Read input from keyboard
@@ -42,10 +41,14 @@ int main()  {
         {
         // Quit
         case CTRL_KEY('q'):
-            textEditor.save_to_file("my_test_file.txt");
+            textEditor.save_to_file(argv[1]);
             write(STDOUT_FILENO, "\x1b[2J", 4);
             write(STDOUT_FILENO, "\x1b[H", 3);
             exit(0);
+            break;
+        
+        case CTRL_KEY('s'):
+            textEditor.save_to_file(argv[1]);
             break;
 
         // Enter Key Pressed

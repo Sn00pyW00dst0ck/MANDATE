@@ -2,20 +2,98 @@
 #include "rawMode.h"
 #include "screenInfo.h"
 
-void wbAppend(struct writeBuffer *wb, const char *s, int len) {
-  char *newBuf = (char*)realloc(wb->b, wb->len + len);
 
-  if (newBuf == NULL) return;
-  memcpy(&newBuf[wb->len], s, len);
-  wb->b = newBuf;
-  wb->len += len;
+void Editor::cursor_left()  {
+    if (this->cursor > 0)  { this->cursor--; }
 }
-void wbFree(struct writeBuffer *wb) {
-  free(wb->b);
+void Editor::cursor_right()  {
+    if (this->cursor < this->data.size())  { this->cursor++; }
+}
+void Editor::cursor_up()  {
+    size_t cursor_row = this->get_cursor_row();
+    size_t cursor_col = this->get_cursor_col();
+    if (cursor_row <= 0)  { return; }   // Do nothing if we can't move up
+
+    // Move up and reposition cursor to end of line if needed
+    Line next_line = this->lines[cursor_row - 1];
+    size_t next_line_size = next_line.end - next_line.start;
+    if (cursor_col > next_line_size) cursor_col = next_line_size;
+    this->cursor = next_line.start + cursor_col;
+}
+void Editor::cursor_down()  {
+    size_t cursor_row = this->get_cursor_row();
+    size_t cursor_col = this->get_cursor_col();
+    if (cursor_row >= this->lines.size() - 1)  { return; }   // Do nothing if we can't move down
+
+    // Move down and repostition cursor to end of line if needed
+    Line next_line = this->lines[cursor_row + 1];
+    size_t next_line_size = next_line.end - next_line.start;
+    if (cursor_col > next_line_size) cursor_col = next_line_size;
+    this->cursor = next_line.start + cursor_col;
 }
 
 
+size_t Editor::get_cursor_row()  {
+    assert(this->lines.size() > 0);
+    for (size_t i = 0; i < this->lines.size(); i++)  {
+        Line curr_line = this->lines[i];
+        if (curr_line.start <= this->cursor && this->cursor <= curr_line.end)  { return i; }
+    }
+    return this->lines.size() - 1;
+}
+size_t Editor::get_cursor_col()  {
+    return this->cursor - this->lines[this->get_cursor_row()].start;
+}
 
+
+void Editor::do_backspace()  {
+
+    this->recompute_lines();
+}
+void Editor::do_delete()  {
+    
+    this->recompute_lines();
+}
+void Editor::do_insert(char c)  {
+    if (this->cursor < this->data.size())  {
+        this->cursor = this->data.size();
+    }
+
+    this->data.insert(this->data.begin() + cursor, {c});
+    this->cursor++;
+    this->recompute_lines();
+}
+void Editor::recompute_lines()  {
+    this->lines.clear();
+
+    Line curr_line;
+    curr_line.start = 0;
+
+    for (size_t i = 0; i < this->data.size(); i++)  {
+        if (this->data[i] == '\n')  {
+            curr_line.end = i;
+            this->lines.push_back(curr_line);
+            curr_line.start = i + 1;
+        }
+    }
+
+    curr_line.end = this->data.size();
+    this->lines.push_back(curr_line);
+}
+
+
+void Editor::save_to_file(const char *file_path)  {
+
+}
+void Editor::load_from_file(const char *file_path)  {
+
+}
+void Editor::get_file_size(const char *file_path)  {
+
+}
+
+
+/*
 //==============================CONSTRUCTORS & DESTRUCTORS==============================//
 
 Editor::Editor()  {
@@ -164,3 +242,4 @@ void Editor::processKeyPress()  {
         break;
     }
 }
+*/

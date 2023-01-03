@@ -10,6 +10,8 @@
 #include "screenInfo.h"
 #include <iostream>
 
+#define CTRL_KEY(k) ((k) & 0x1f)
+
 enum EDITOR_KEYS  {
     BACKSPACE=127,
     ARROW_UP=1000,

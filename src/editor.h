@@ -13,8 +13,6 @@
 #include <vector>
 #include <string>
 
-#define CTRL_KEY(k) ((k) & 0x1f)
-
 struct Line  {
     size_t start = 0;
     size_t end = 0;

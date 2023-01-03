@@ -45,23 +45,4 @@ public:
 
     void display_lines();
 
-/*
-    int cursorX, cursorY;
-    int screenRows, screenCols;
-
-
-    int readKey();
-    void moveCursor(int key);
-
-    void drawRows(struct writeBuffer *wb);
-
-public:
-    Editor();
-    ~Editor();
-
-    void refreshScreen();
-    void processKeyPress();
-};
-*/
-
 };

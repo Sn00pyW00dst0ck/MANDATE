@@ -9,6 +9,7 @@
 
 #include "editor.h"
 #include "rawMode.h"
+#include "screenInfo.h"
 #include <iostream>
 
 enum EDITOR_KEYS  {
@@ -60,7 +61,7 @@ int main()  {
             textEditor.do_backspace();
             break;
 
-        // Move the Cursor
+        // Cursor Movement
         case ARROW_LEFT:
             textEditor.cursor_left();
             break;
@@ -72,6 +73,21 @@ int main()  {
             break;
         case ARROW_DOWN:
             textEditor.cursor_down();
+            break;
+        case PAGE_UP:
+        case PAGE_DOWN:
+            {
+            int row, col;
+            getWindowSize(&row, &col);
+            while (col--)
+                (c == PAGE_UP ? textEditor.cursor_up() : textEditor.cursor_down());
+            }
+            break;
+        case HOME_KEY:
+            
+            break;
+        case END_KEY:
+
             break;
         
         // Default is inserting a character

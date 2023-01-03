@@ -1,6 +1,8 @@
 #include "editor.h"
 #include "rawMode.h"
 #include "screenInfo.h"
+#include <string>
+#include <iostream>
 
 
 void Editor::cursor_left()  {
@@ -47,25 +49,24 @@ size_t Editor::get_cursor_col()  {
 
 
 void Editor::do_backspace()  {
-
+    // Might need special case handling here
+    this->data.erase(this->data.begin() + cursor - 1);
+    this->cursor--;
     this->recompute_lines();
 }
 void Editor::do_delete()  {
-    
+    // Might need special case handling here
+    this->data.erase(this->data.begin() + cursor);
     this->recompute_lines();
 }
 void Editor::do_insert(char c)  {
-    if (this->cursor < this->data.size())  {
-        this->cursor = this->data.size();
-    }
-
-    this->data.insert(this->data.begin() + cursor, {c});
+    // Might need special case handling here    
+    this->data.insert(cursor, 1, c);
     this->cursor++;
     this->recompute_lines();
 }
 void Editor::recompute_lines()  {
     this->lines.clear();
-
     Line curr_line;
     curr_line.start = 0;
 
@@ -92,6 +93,41 @@ void Editor::get_file_size(const char *file_path)  {
 
 }
 
+void Editor::display_lines()  {
+    // Get information about the terminal
+    int rows, cols;
+    getWindowSize(&rows, &cols);
+
+    std::string displayOutput = "";
+    displayOutput += "\x1b[?25l";   // Hide Cursor
+    displayOutput += "\x1b[H";      // Repositions Cursor to top left of screen (for writing text properly to screen)
+
+    int pos = 0;
+    for (int y = 0; y < rows; y++)  {
+        displayOutput += "\x1b[K";  // Clear Old Line Contents
+
+        if (y >= this->lines.size() || this->lines[y].start == this->lines[y].end)  {
+            displayOutput += "~";
+        } else  {
+            // Print out this line's contents
+            displayOutput += this->data.substr(this->lines[y].start, this->lines[y].end - this->lines[y].start);
+        }
+        
+        if (y < rows - 1)  { displayOutput += "\r\n"; }
+    }
+
+    // Position Cursor to correct position
+    char buf[32];
+    if (this->lines.size() > 0)  {
+        snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (int)this->get_cursor_row() + 1, (int)this->get_cursor_col() + 1);
+    } else  {
+        snprintf(buf, sizeof(buf), "\x1b[%d;%dH", 1, 1);
+    }
+    displayOutput += buf;
+    displayOutput += "\x1b[?25h"; // Show Cursor
+
+    write(STDOUT_FILENO, displayOutput.c_str(), displayOutput.size()); // Write the entire sequence
+}
 
 /*
 //==============================CONSTRUCTORS & DESTRUCTORS==============================//

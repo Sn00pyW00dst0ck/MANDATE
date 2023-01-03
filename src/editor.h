@@ -11,19 +11,20 @@
 #include <unistd.h>
 
 #include <vector>
+#include <string>
 
 #define CTRL_KEY(k) ((k) & 0x1f)
 
 struct Line  {
-    size_t start;
-    size_t end;
+    size_t start = 0;
+    size_t end = 0;
 };
 
 class Editor {
 public:
-    std::vector<char> data;         // Holds actual characters
+    std::string data = "";         // Holds actual characters
     std::vector<Line> lines;        // Holds start and end of each line
-    size_t cursor;                  // Holds cursor position in data array
+    size_t cursor = 0;                  // Holds cursor position in data array
 
     void cursor_left();     // Cursor Movement Function
     void cursor_right();    // Cursor Movement Function    
@@ -41,6 +42,8 @@ public:
     void save_to_file(const char *file_path);       // File Operations
     void load_from_file(const char *file_path);     // File Operations
     void get_file_size(const char *file_path);      // File Operations
+
+    void display_lines();
 
 /*
     int cursorX, cursorY;

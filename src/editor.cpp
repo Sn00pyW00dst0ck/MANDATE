@@ -93,6 +93,7 @@ void Editor::get_file_size(const char *file_path)  {
 
 }
 
+
 void Editor::display_lines()  {
     // Get information about the terminal
     int rows, cols;

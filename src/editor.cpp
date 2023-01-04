@@ -131,12 +131,13 @@ void Editor::display_lines()  {
     displayOutput += "\x1b[H";      // Repositions Cursor to top left of screen (for writing text properly to screen)
 
     for (int y = 0; y < rows; y++)  {
-        int currentRow = y + rowScroll;
+        int currentRow = y + rowScroll; // Offset by the vertical scroll value here
 
         displayOutput += "\x1b[K";  // Clear Old Line Contents
 
         // Print out this line's contents
         if (!(currentRow >= this->lines.size() || this->lines[currentRow].start == this->lines[currentRow].end))  {
+            // Determine part of line to write based on the scroll we calculated
             int len = (this->lines[currentRow].end - this->lines[currentRow].start) - colScroll;
             len = (len > cols) ? cols : len;
             if (len > 0)  { displayOutput += this->data.substr(this->lines[currentRow].start + colScroll, len); }
@@ -147,7 +148,7 @@ void Editor::display_lines()  {
 
     // Position Cursor to correct position
     char buf[32];
-    snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (int)cursorRow - rowScroll, (int)cursorCol - colScroll);
+    snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (int)cursorRow - rowScroll, (int)cursorCol - colScroll); // Subtract scroll values here to prevent doubled movement speed
     displayOutput += buf;
     displayOutput += "\x1b[?25h"; // Show Cursor
 

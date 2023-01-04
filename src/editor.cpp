@@ -125,10 +125,8 @@ void Editor::display_lines()  {
     for (int y = 0; y < rows; y++)  {
         displayOutput += "\x1b[K";  // Clear Old Line Contents
 
-        if (y >= this->lines.size() || this->lines[y].start == this->lines[y].end)  {
-            displayOutput += "~";
-        } else  {
-            // Print out this line's contents
+        // Print out this line's contents
+        if (!(y >= this->lines.size() || this->lines[y].start == this->lines[y].end))  {
             displayOutput += this->data.substr(this->lines[y].start, this->lines[y].end - this->lines[y].start);
         }
         

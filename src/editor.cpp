@@ -121,9 +121,9 @@ void Editor::display_lines()  {
     size_t cursorRow = (this->lines.size() > 0) ? this->get_cursor_row() + 1 : 1;
     size_t cursorCol = (this->lines.size() > 0) ? this->get_cursor_col() + 1 : 1;
 
-    // Calculate scroll information
-
-
+    // Calculate scroll information??
+    int rowScroll = (int)cursorRow > (rows / 2) ? (int)cursorRow - (rows / 2) : 0;
+    int colScroll = (int)cursorCol > (cols / 2) ? (int)cursorCol - (cols / 2) : 0;
     
 
     std::string displayOutput = "";
@@ -131,11 +131,15 @@ void Editor::display_lines()  {
     displayOutput += "\x1b[H";      // Repositions Cursor to top left of screen (for writing text properly to screen)
 
     for (int y = 0; y < rows; y++)  {
+        int currentRow = y + rowScroll;
+
         displayOutput += "\x1b[K";  // Clear Old Line Contents
 
         // Print out this line's contents
-        if (!(y >= this->lines.size() || this->lines[y].start == this->lines[y].end))  {
-            displayOutput += this->data.substr(this->lines[y].start, this->lines[y].end - this->lines[y].start);
+        if (!(currentRow >= this->lines.size() || this->lines[currentRow].start == this->lines[currentRow].end))  {
+            int len = (this->lines[currentRow].end - this->lines[currentRow].start) - colScroll;
+            len = (len > cols) ? cols : len;
+            if (len > 0)  { displayOutput += this->data.substr(this->lines[currentRow].start + colScroll, len); }
         }
         
         if (y < rows - 1)  { displayOutput += "\r\n"; }
@@ -143,7 +147,7 @@ void Editor::display_lines()  {
 
     // Position Cursor to correct position
     char buf[32];
-    snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (int)cursorRow, (int)cursorCol);
+    snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (int)cursorRow - rowScroll, (int)cursorCol - colScroll);
     displayOutput += buf;
     displayOutput += "\x1b[?25h"; // Show Cursor
 

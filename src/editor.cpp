@@ -121,10 +121,9 @@ void Editor::display_lines()  {
     size_t cursorRow = (this->lines.size() > 0) ? this->get_cursor_row() + 1 : 1;
     size_t cursorCol = (this->lines.size() > 0) ? this->get_cursor_col() + 1 : 1;
 
-    // Calculate scroll information??
+    // Calculate scroll information
     int rowScroll = (int)cursorRow > (rows / 2) ? (int)cursorRow - (rows / 2) : 0;
     int colScroll = (int)cursorCol > (cols / 2) ? (int)cursorCol - (cols / 2) : 0;
-    
 
     std::string displayOutput = "";
     displayOutput += "\x1b[?25l";   // Hide Cursor

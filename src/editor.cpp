@@ -117,11 +117,19 @@ void Editor::display_lines()  {
     int rows, cols;
     getWindowSize(&rows, &cols);
 
+    // Get information about the cursor position
+    size_t cursorRow = (this->lines.size() > 0) ? this->get_cursor_row() + 1 : 1;
+    size_t cursorCol = (this->lines.size() > 0) ? this->get_cursor_col() + 1 : 1;
+
+    // Calculate scroll information
+
+
+    
+
     std::string displayOutput = "";
     displayOutput += "\x1b[?25l";   // Hide Cursor
     displayOutput += "\x1b[H";      // Repositions Cursor to top left of screen (for writing text properly to screen)
 
-    int pos = 0;
     for (int y = 0; y < rows; y++)  {
         displayOutput += "\x1b[K";  // Clear Old Line Contents
 
@@ -135,11 +143,7 @@ void Editor::display_lines()  {
 
     // Position Cursor to correct position
     char buf[32];
-    if (this->lines.size() > 0)  {
-        snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (int)this->get_cursor_row() + 1, (int)this->get_cursor_col() + 1);
-    } else  {
-        snprintf(buf, sizeof(buf), "\x1b[%d;%dH", 1, 1);
-    }
+    snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (int)cursorRow, (int)cursorCol);
     displayOutput += buf;
     displayOutput += "\x1b[?25h"; // Show Cursor
 

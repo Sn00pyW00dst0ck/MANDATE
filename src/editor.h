@@ -31,6 +31,8 @@ public:
 
     size_t get_cursor_row();    // Cursor Position Getters
     size_t get_cursor_col();    // Cursor Position Getters
+    size_t get_scroll_row(int window_rows);     // Scroll Position Getters
+    size_t get_scroll_col(int window_cols);     // Scroll Position Getters
 
     void do_backspace();    // Buffer Editing Operations
     void do_delete();       // Buffer Editing Operations
@@ -40,5 +42,7 @@ public:
     void save_to_file(const char *file_path);       // File Operations
     void load_from_file(const char *file_path);     // File Operations
 
-    void display_lines();
+    
+    void display_lines(int window_rows, int window_cols);
+    std::vector<std::string> get_display_lines(int window_rows, int window_cols);
 };

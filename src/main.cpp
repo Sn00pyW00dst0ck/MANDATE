@@ -9,6 +9,7 @@
 #include "rawMode.h"
 #include "screenInfo.h"
 #include <iostream>
+#include <vector>
 #include <algorithm>
 
 #define CTRL_KEY(k) ((k) & 0x1f)
@@ -27,18 +28,23 @@ enum EDITOR_KEYS  {
 };
 
 const std::string helpMenuString = ""
-"    __  ______    _   ______  ___  ____________\r\n"
-"   /  |/  /   |  / | / / __ \\/   |/_  __/ ____/\r\n"
-"  / /|_/ / /| | /  |/ / / / / /| | / / / __/   \r\n"
-" / /  / / ___ |/ /|  / /_/ / ___ |/ / / /___   \r\n"
-"/_/  /_/_/  |_/_/ |_/_____/_/  |_/_/ /_____/   \r\n"
-"                                               \r\n"
-"===============================================\r\n"
-"                   Ver 1.0.1                   \r\n"
-"                                               \r\n"
-"Command Line Options:                          \r\n"
-"mandate -h              Displays this help menu\r\n"
-"                                               \r\n";
+"          __  ______    _   ______  ___  ____________      \r\n"
+"         /  |/  /   |  / | / / __ \\/   |/_  __/ ____/      \r\n"
+"        / /|_/ / /| | /  |/ / / / / /| | / / / __/         \r\n"
+"       / /  / / ___ |/ /|  / /_/ / ___ |/ / / /___         \r\n"
+"      /_/  /_/_/  |_/_/ |_/_____/_/  |_/_/ /_____/         \r\n"
+"                                                           \r\n"
+"===========================================================\r\n"
+"                        Ver 1.0.1                          \r\n"
+"                                                           \r\n"
+"Usage: mandate [OPTIONS] [FILE]                            \r\n"
+"\r\n"
+"Option      Long Option           Meaning                  \r\n"
+"-h          --help                Displays this help menu  \r\n"
+"                                                           \r\n";
+
+
+
 
 char* getCmdOption(char** begin, char** end, const std::string& option)  {
     char** itr = std::find(begin, end, option);
@@ -58,23 +64,48 @@ int readKeyInput();
 int main(int argc, char** argv)  {
     enableRawMode();
 
-    if (cmdOptionExists(argv, argv + argc, "-h"))  {
-
-        std::cout << helpMenuString;
+    if (cmdOptionExists(argv, argv + argc, "-h") || cmdOptionExists(argv, argv + argc, "--help"))  {
         //display help menu
-
-
+        std::cout << helpMenuString;
         exit(0);
     }
 
     
+
+    int rows, cols;
+    getWindowSize(&rows, &cols);
 
     Editor textEditor;
     textEditor.load_from_file(argv[1]);
 
     while (true)  {
         // Display the text to the screen
-        textEditor.display_lines();
+        //textEditor.display_lines(rows, cols);
+        
+        
+        //Alt display to screen
+        std::vector<std::string> outputLines = textEditor.get_display_lines(rows, cols);
+        std::string displayOutput = "";
+        displayOutput += "\x1b[?25l";   // Hide Cursor
+        displayOutput += "\x1b[H";      // Repositions Cursor to top left of screen (for writing text properly to screen)
+        for (int i = 0; i < rows; i++)  {
+            displayOutput += "\x1b[K";  // Clear Old Line Contents
+            displayOutput += outputLines[i];    // Put line content
+            if (i < rows - 1)  { displayOutput += "\r\n"; } // Add newline if not the last line
+        }
+        // Get information about the cursor & scroll position
+        size_t cursorRow = (textEditor.lines.size() > 0) ? textEditor.get_cursor_row() + 1 : 1;
+        size_t cursorCol = (textEditor.lines.size() > 0) ? textEditor.get_cursor_col() + 1 : 1;
+        int rowScroll = textEditor.get_scroll_row(rows);
+        int colScroll = textEditor.get_scroll_col(cols);
+        // Position Cursor to correct position
+        char buf[32];
+        snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (int)cursorRow - rowScroll, (int)cursorCol - colScroll); // Subtract scroll values here to prevent doubled movement speed
+        displayOutput += buf;
+        displayOutput += "\x1b[?25h"; // Show Cursor
+        write(STDOUT_FILENO, displayOutput.c_str(), displayOutput.size()); // Write the entire sequence
+        
+
 
         // Read input from keyboard
         int c = readKeyInput();

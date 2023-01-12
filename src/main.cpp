@@ -9,6 +9,7 @@
 #include "rawMode.h"
 #include "screenInfo.h"
 #include <iostream>
+#include <algorithm>
 
 #define CTRL_KEY(k) ((k) & 0x1f)
 
@@ -25,10 +26,49 @@ enum EDITOR_KEYS  {
     PAGE_DOWN
 };
 
+const std::string helpMenuString = ""
+"    __  ______    _   ______  ___  ____________\r\n"
+"   /  |/  /   |  / | / / __ \\/   |/_  __/ ____/\r\n"
+"  / /|_/ / /| | /  |/ / / / / /| | / / / __/   \r\n"
+" / /  / / ___ |/ /|  / /_/ / ___ |/ / / /___   \r\n"
+"/_/  /_/_/  |_/_/ |_/_____/_/  |_/_/ /_____/   \r\n"
+"                                               \r\n"
+"===============================================\r\n"
+"                   Ver 1.0.1                   \r\n"
+"                                               \r\n"
+"Command Line Options:                          \r\n"
+"mandate -h              Displays this help menu\r\n"
+"                                               \r\n";
+
+char* getCmdOption(char** begin, char** end, const std::string& option)  {
+    char** itr = std::find(begin, end, option);
+    if (itr != end && ++itr != end)  {
+        return *itr;
+    }
+    return nullptr;
+}
+
+bool cmdOptionExists(char** begin, char** end, const std::string& option)  {
+    return std::find(begin, end, option) != end;
+}
+
+
 int readKeyInput();
 
 int main(int argc, char** argv)  {
     enableRawMode();
+
+    if (cmdOptionExists(argv, argv + argc, "-h"))  {
+
+        std::cout << helpMenuString;
+        //display help menu
+
+
+        exit(0);
+    }
+
+    
+
     Editor textEditor;
     textEditor.load_from_file(argv[1]);
 

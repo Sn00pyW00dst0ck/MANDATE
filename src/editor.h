@@ -20,6 +20,8 @@ struct Line  {
 
 class Editor {
 public:
+    // TODO: ADD A VARIABLE FOR STORING FILE TO BE OPENED / CLOSED ?? 
+    
     std::string data = "";              // Holds actual characters
     std::vector<Line> lines;            // Holds start and end of each line
     size_t cursor = 0;                  // Holds cursor position in data array

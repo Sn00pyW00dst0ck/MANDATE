@@ -6,6 +6,7 @@
 */
 
 #include "editor.h"
+#include "editorManager.h"
 #include "rawMode.h"
 #include "screenInfo.h"
 #include <iostream>
@@ -75,37 +76,15 @@ int main(int argc, char** argv)  {
     int rows, cols;
     getWindowSize(&rows, &cols);
 
-    Editor textEditor;
-    textEditor.load_from_file(argv[1]);
+    EditorManager mandater;
+    mandater.openNewEditor("hello.txt");
+    mandater.openNewEditor("myfile.txt");
+    mandater.swapActiveEditor(0);
+    
 
     while (true)  {
         // Display the text to the screen
-        //textEditor.display_lines(rows, cols);
-        
-        
-        //Alt display to screen
-        std::vector<std::string> outputLines = textEditor.get_display_lines(rows, cols);
-        std::string displayOutput = "";
-        displayOutput += "\x1b[?25l";   // Hide Cursor
-        displayOutput += "\x1b[H";      // Repositions Cursor to top left of screen (for writing text properly to screen)
-        for (int i = 0; i < rows; i++)  {
-            displayOutput += "\x1b[K";  // Clear Old Line Contents
-            displayOutput += outputLines[i];    // Put line content
-            if (i < rows - 1)  { displayOutput += "\r\n"; } // Add newline if not the last line
-        }
-        // Get information about the cursor & scroll position
-        size_t cursorRow = (textEditor.lines.size() > 0) ? textEditor.get_cursor_row() + 1 : 1;
-        size_t cursorCol = (textEditor.lines.size() > 0) ? textEditor.get_cursor_col() + 1 : 1;
-        int rowScroll = textEditor.get_scroll_row(rows);
-        int colScroll = textEditor.get_scroll_col(cols);
-        // Position Cursor to correct position
-        char buf[32];
-        snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (int)cursorRow - rowScroll, (int)cursorCol - colScroll); // Subtract scroll values here to prevent doubled movement speed
-        displayOutput += buf;
-        displayOutput += "\x1b[?25h"; // Show Cursor
-        write(STDOUT_FILENO, displayOutput.c_str(), displayOutput.size()); // Write the entire sequence
-        
-
+        mandater.displayEditors();
 
         // Read input from keyboard
         int c = readKeyInput();
@@ -114,43 +93,43 @@ int main(int argc, char** argv)  {
         {
         // Quit
         case CTRL_KEY('q'):
-            textEditor.save_to_file(argv[1]);
+            mandater.getActiveEditor().save_to_file(argv[1]);
             write(STDOUT_FILENO, "\x1b[2J", 4);
             write(STDOUT_FILENO, "\x1b[H", 3);
             exit(0);
             break;
         
         case CTRL_KEY('s'):
-            textEditor.save_to_file(argv[1]);
+            mandater.getActiveEditor().save_to_file(argv[1]);
             break;
 
         // Enter Key Pressed
         case '\r':
-            textEditor.do_insert('\n');
+            mandater.getActiveEditor().do_insert('\n');
             break;
 
         // Delete Key Pressed
         case DELETE_KEY:
-            textEditor.do_delete();
+            mandater.getActiveEditor().do_delete();
             break;
         
         // Backspace Key Pressed
         case BACKSPACE:
-            textEditor.do_backspace();
+            mandater.getActiveEditor().do_backspace();
             break;
 
         // Cursor Movement
         case ARROW_LEFT:
-            textEditor.cursor_left();
+            mandater.getActiveEditor().cursor_left();
             break;
         case ARROW_RIGHT:
-            textEditor.cursor_right();
+            mandater.getActiveEditor().cursor_right();
             break;
         case ARROW_UP:
-            textEditor.cursor_up();
+            mandater.getActiveEditor().cursor_up();
             break;
         case ARROW_DOWN:
-            textEditor.cursor_down();
+            mandater.getActiveEditor().cursor_down();
             break;
         case PAGE_UP:
         case PAGE_DOWN:
@@ -158,7 +137,7 @@ int main(int argc, char** argv)  {
             int row, col;
             getWindowSize(&row, &col);
             while (col--)
-                (c == PAGE_UP ? textEditor.cursor_up() : textEditor.cursor_down());
+                (c == PAGE_UP ? mandater.getActiveEditor().cursor_up() : mandater.getActiveEditor().cursor_down());
             }
             break;
         case HOME_KEY:
@@ -170,7 +149,7 @@ int main(int argc, char** argv)  {
         
         // Default is inserting a character
         default:
-            textEditor.do_insert(c);
+            mandater.getActiveEditor().do_insert(c);
             break;
         }
     }

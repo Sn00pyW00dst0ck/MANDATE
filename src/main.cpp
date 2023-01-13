@@ -103,6 +103,11 @@ int main(int argc, char** argv)  {
             mandater.getActiveEditor().save_to_file(argv[1]);
             break;
 
+        case CTRL_KEY('p'):
+            // Modulus to wrap around to start editor on full cycle
+            mandater.swapActiveEditor((mandater.activeEditor + 1) % mandater.editors.size());
+            break;
+
         // Enter Key Pressed
         case '\r':
             mandater.getActiveEditor().do_insert('\n');

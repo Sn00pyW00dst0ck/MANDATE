@@ -70,18 +70,17 @@ void EditorManager::displayEditors()  {
         outs.push_back("");
         for (int i = 0; i < this->editors.size(); i++)  {
             outs[y] += editorOutputLines[i][y];
-            outs[y] += "|";
+            if (i < this->editors.size() - 1)  { outs[y] += "║"; }
         }
     }
 
     for (int i = 0; i < rows; i++)  {
         displayOutput += "\x1b[K";  // Clear Old Line Contents
-        //displayOutput += outputLines[i];    // Put line content
-        //displayOutput += "|";
-        displayOutput += outs[i];
-        
+        displayOutput += outs[i];   // Write the calculated line content
         if (i < rows - 1)  { displayOutput += "\r\n"; } // Add newline if not the last line
     }
+
+    // TO DO: Clean up cursor position calculation
 
     // Get information about the cursor & scroll position
     size_t cursorRow = (this->getActiveEditor().lines.size() > 0) ? this->getActiveEditor().get_cursor_row() + 1 : 1;
@@ -89,9 +88,12 @@ void EditorManager::displayEditors()  {
     int rowScroll = this->getActiveEditor().get_scroll_row(rows);
     int colScroll = this->getActiveEditor().get_scroll_col(cols);
 
+    // Position within editor window + position of editor window (clean this up)
+    int finalCursorCol = (cursorCol - colScroll) + (this->activeEditor * (1 + editorOutputLines[0][0].size()));
+
     // Position Cursor to correct position
     char buf[32];
-    snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (int)cursorRow - rowScroll, (int)cursorCol - colScroll); // Subtract scroll values here to prevent doubled movement speed
+    snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (int)cursorRow - rowScroll, finalCursorCol); // Subtract scroll values here to prevent doubled movement speed
     displayOutput += buf;
     displayOutput += "\x1b[?25h"; // Show Cursor
     write(STDOUT_FILENO, displayOutput.c_str(), displayOutput.size()); // Write the entire sequence

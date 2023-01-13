@@ -1,6 +1,7 @@
 
 #include "editorManager.h"
 #include "screenInfo.h"
+#include <math.h>
 
 EditorManager::EditorManager()  {
 
@@ -54,8 +55,9 @@ void EditorManager::displayEditors()  {
     getWindowSize(&rows, &cols);
 
     //Calculate how big each editor should be width and height wise (for now equal sizes)
-    cols /= this->editors.size();
-    cols -= this->editors.size();
+    rows -= 5;
+    cols = (cols / this->editors.size());
+    //cols -= this->editors.size();
 
     // Placeholder just display the active editor at all times
     std::vector<std::string> outputLines = this->getActiveEditor().get_display_lines(rows, cols);
@@ -64,21 +66,37 @@ void EditorManager::displayEditors()  {
     std::vector<std::string> outs;
     std::vector<std::vector<std::string>> editorOutputLines;
     for (int i = 0; i < this->editors.size(); i++)  {
-        editorOutputLines.push_back(this->editors[i].get_display_lines(rows, cols));
+        editorOutputLines.push_back(this->editors[i].get_display_lines(rows, cols - 1));
     }
     for (int y = 0; y < rows; y++)  {
         outs.push_back("");
         for (int i = 0; i < this->editors.size(); i++)  {
             outs[y] += editorOutputLines[i][y];
-            if (i < this->editors.size() - 1)  { outs[y] += "║"; }
+            if (i < this->editors.size() - 1)  { outs[y] += "│"; }
         }
     }
 
     for (int i = 0; i < rows; i++)  {
         displayOutput += "\x1b[K";  // Clear Old Line Contents
         displayOutput += outs[i];   // Write the calculated line content
-        if (i < rows - 1)  { displayOutput += "\r\n"; } // Add newline if not the last line
+        displayOutput += "\r\n";    // Add newline if not the last line
     }
+
+    // Now we need to draw the bottom divider
+    displayOutput += "\x1b[K";  // Clear Old Line Contents
+    for (int i = 0; i < this->editors.size(); i++)  {
+        for (int j = 0; j < cols - 1; j++)  {
+            displayOutput += "─";
+        }
+        if (i < this->editors.size() - 1)  { displayOutput += "┴"; }
+    }
+    displayOutput += "\r\n";
+    
+    // Now we need to add the menu options
+    displayOutput += "\x1b[K\r\n";
+    displayOutput += "\x1b[K\r\n";
+    displayOutput += "\x1b[K^W Open New Editor        ^C Close Current Editor    ^Q Quit Application\t\r\n";
+    displayOutput += "\x1b[K^P Cycle Active Editor    ";
 
     // TO DO: Clean up cursor position calculation
 
